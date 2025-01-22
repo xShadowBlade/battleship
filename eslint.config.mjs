@@ -27,7 +27,7 @@ export default tseslint.config(
             },
         },
         files: ["src/**/*.ts", "src/**/*.tsx"],
-        ignores: ["node_modules", "dist", "test"],
+        ignores: ["node_modules", "dist", "pxt_modules"],
         rules: {
             "prettier/prettier": "warn",
 
