@@ -9,7 +9,10 @@
         "microbit-pxt-clicks": "github:bsiever/microbit-pxt-clicks#v0.2.2"
     },
     "files": [
-        "src/**/*.ts",
+        "src/index.ts",
+        "src/ship.ts",
+        "src/game.ts",
+        "src/radio.ts",
         "README.md"
     ],
     "testFiles": [
