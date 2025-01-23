@@ -2,8 +2,6 @@
  * @file Declares utility functions for radio communication
  */
 
-import type { Coordinate } from "./ship";
-
 /**
  * The type of radio message.
  * The value should be a short string (3 characters or less) to save memory.
@@ -11,54 +9,54 @@ import type { Coordinate } from "./ship";
  * - `n` for number
  * - `c` for coordinate
  */
-export enum RadioMessageKey {
+enum RadioMessageKey {
     /**
      * A player has joined the game
      * - Payload is of type `number`: the player number that joined.
      */
-    PlayerJoined = "nPj",
+    playerJoined = "nPj",
 
     /**
      * A player has left the game.
      * - Payload is of type `number`: the player number that left.
      */
-    PlayerLeft = "nPl",
+    playerLeft = "nPl",
 
     /**
      * A player is attacking a coordinate.
      * - Payload is of type `Coordinate`: the coordinate being attacked.
      */
-    Attack = "cAt",
+    attack = "cAt",
 
     /**
      * The result of an attack - hit.
      * - Payload is of type `Coordinate`: the coordinate that was hit.
      */
-    Hit = "cHt",
+    hit = "cHt",
 
     /**
      * The result of an attack - miss.
      * - Payload is of type `Coordinate`: the coordinate that was missed.
      */
-    Miss = "cMs",
+    miss = "cMs",
 }
 
 /**
  * The values that can be sent with a radio message
  */
 // ! Note: this also doesn't work because the version of TypeScript doesn't support a computed property name in an interface .-.
-export interface RadioMessageValues {
+interface RadioMessageValues {
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     // @ts-ignore
-    [RadioMessageKey.PlayerJoined]: number;
+    [RadioMessageKey.playerJoined]: number;
     // @ts-ignore
-    [RadioMessageKey.PlayerLeft]: number;
+    [RadioMessageKey.playerLeft]: number;
     // @ts-ignore
-    [RadioMessageKey.Attack]: Coordinate;
+    [RadioMessageKey.attack]: Coordinate;
     // @ts-ignore
-    [RadioMessageKey.Hit]: Coordinate;
+    [RadioMessageKey.hit]: Coordinate;
     // @ts-ignore
-    [RadioMessageKey.Miss]: Coordinate;
+    [RadioMessageKey.miss]: Coordinate;
     /* eslint-enable @typescript-eslint/ban-ts-comment */
 }
 // ! Note: this doesn't work because the version of TypeScript used in the micro:bit doesn't support template literal types
@@ -80,12 +78,12 @@ export interface RadioMessageValues {
  * A callback that is called when a radio message is received
  * @template T - The type of radio message. Should be a key of {@link RadioMessageKey}
  */
-export type RadioMessageCallback<T extends RadioMessageKey> = (value: RadioMessageValues[T]) => void;
+type RadioMessageCallback<T extends RadioMessageKey> = (value: RadioMessageValues[T]) => void;
 
 /**
  * Handles radio communication for the game
  */
-export class GameRadio {
+class GameRadio {
     /**
      * The radio group ID for the game for players to join
      */
@@ -207,9 +205,6 @@ export class GameRadio {
      * @template T - The type of radio message. Should be a key of {@link RadioMessageKey}
      */
     public sendValue<T extends RadioMessageKey>(messageType: T, value: RadioMessageValues[T]): void {
-        // Debug
-        console.log(`Sending message: "${messageType}" with value "${value}"`);
-
         // Get the key for the message type
         const key = messageType as string;
 
@@ -220,14 +215,25 @@ export class GameRadio {
         switch (key.charAt(0)) {
             case "n":
                 messageValue = value as number;
+
+                // Debug
+                console.log(`Sending message: "${key}" with value "${messageValue}"`);
+
                 break;
             case "c":
                 messageValue = GameRadio.coordinatesToNumber(value as Coordinate);
+
+                // Debug
+                console.log(
+                    `Sending message: "${key}" with value "${messageValue}", coordinates: ${(value as Coordinate)[0]}, ${(value as Coordinate)[1]}`,
+                );
+
                 break;
             default:
                 // By default, just use the value
                 console.warn(`Unknown message type: ${key}`);
                 messageValue = value as number;
+                console.warn(`Sending message: "${key}" with value "${messageValue}"`);
                 break;
         }
 

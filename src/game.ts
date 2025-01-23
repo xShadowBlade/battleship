@@ -1,12 +1,11 @@
 /**
  * @file Game logic class
  */
-import { GameRadio } from "./radio";
 
 /**
  * Declares the game class, which contains the game logic and state
  */
-export class Game {
+class Game {
     /**
      * The radio group ID for the game for players to join
      */
@@ -15,7 +14,7 @@ export class Game {
     /**
      * Creates a new game
      */
-    public constructor() {
-        // this.radio = new GameRadio();
-    }
+    // public constructor() {
+
+    // }
 }

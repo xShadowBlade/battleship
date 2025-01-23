@@ -2,9 +2,17 @@
     "compilerOptions": {
         "target": "ES5",
         "noImplicitAny": true,
+        "strict": true,
         "outDir": "built",
         "rootDir": ".",
-        "typeRoots": ["pxt_modules/*"],
+        "typeRoots": [
+            // Type declaration files for the pxt-core API
+            "pxt_modules/*",
+            // All symbols in top-level scope of files are always exported.
+            // In fact you will get an error if you use the `export` keyword
+            // outside of a namespace for some reason?
+            "src/*",
+        ],
     },
     "exclude": ["pxt_modules/**/*test.ts"]
 }

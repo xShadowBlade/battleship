@@ -5,7 +5,7 @@
 /**
  * A class of ship such as Carrier, Battleship, Cruiser, Submarine, Destroyer
  */
-export interface ShipClass {
+interface ShipClass {
     /**
      * The name of the ship class
      * @example "Carrier"
@@ -29,7 +29,7 @@ export interface ShipClass {
 /**
  * A list of ship classes
  */
-export const shipClasses = [
+const shipClasses = [
     {
         name: "Carrier",
         size: 5,
@@ -60,12 +60,12 @@ export const shipClasses = [
 /**
  * The name of a ship class, from the list of ship classes
  */
-export type ShipClassName = (typeof shipClasses)[number]["name"];
+type ShipClassName = (typeof shipClasses)[number]["name"];
 
 /**
  * The orientation of a ship, either horizontal or vertical
  */
-export enum ShipOrientation {
+enum ShipOrientation {
     /**
      * The ship is placed horizontally, from left (x = 0) to right (+x)
      */
@@ -83,12 +83,12 @@ export enum ShipOrientation {
  * - The x coordinate is the column number, ranging from 0 to 4. *0 is the leftmost column*.
  * - The y coordinate is the row number, ranging from 0 to 4. *0 is the top row*.
  */
-export type Coordinate = [uint8, uint8];
+type Coordinate = [uint8, uint8];
 
 /**
  * Represents a generic ship of any ship class
  */
-export class Ship {
+class Ship {
     /**
      * The name of the ship class.
      * Gotten from the ship class object.
