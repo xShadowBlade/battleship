@@ -9,70 +9,83 @@
  * - `n` for number
  * - `c` for coordinate
  */
-enum RadioMessageKey {
+// eslint-disable-next-line @typescript-eslint/naming-convention
+const RadioMessageKeyRecord = {
     /**
      * A player has joined the game
      * - Payload is of type `number`: the player number that joined.
      */
-    playerJoined = "nPj",
+    playerJoined: "nPj",
 
     /**
      * A player has left the game.
      * - Payload is of type `number`: the player number that left.
      */
-    playerLeft = "nPl",
+    playerLeft: "nPl",
 
     /**
      * A player is proceeding to setup the game.
      * - Payload is of type `number`: other player's player number.
      */
-    proceedingToSetup = "nP2",
+    proceedingToSetup: "nP2",
 
     /**
      * A player is attacking a coordinate.
      * - Payload is of type `Coordinate`: the coordinate being attacked.
      */
-    attack = "cAt",
+    attack: "cAt",
 
     /**
      * The result of an attack - hit.
      * - Payload is of type `Coordinate`: the coordinate that was hit.
      */
-    hit = "cHt",
+    hit: "cHt",
 
     /**
      * The result of an attack - miss.
      * - Payload is of type `Coordinate`: the coordinate that was missed.
      */
-    miss = "cMs",
-}
+    miss: "cMs",
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore - const is not supported in this typescript
+} as const;
+
+/**
+ * The possible values for the keys of RadioMessage.
+ * @example "nPj" | "nPl" | "cHt"
+ */
+type RadioMessageKeyValues = (typeof RadioMessageKeyRecord)[keyof typeof RadioMessageKeyRecord];
 
 /**
  * The values that can be sent with a radio message
+ * @example { nPj: number, cHt: Coordinate }
  */
 // ! Note: this also doesn't work because the version of TypeScript doesn't support a computed property name in an interface .-.
-interface RadioMessageValues {
+type RadioMessageValues = {
     /* eslint-disable @typescript-eslint/ban-ts-comment */
     // @ts-ignore
-    [RadioMessageKey.playerJoined]: number;
+    [RadioMessageKeyRecord.playerJoined]: number;
     // @ts-ignore
-    [RadioMessageKey.playerLeft]: number;
+    [RadioMessageKeyRecord.playerLeft]: number;
     // @ts-ignore
-    [RadioMessageKey.proceedingToSetup]: number;
+    [RadioMessageKeyRecord.proceedingToSetup]: number;
     // @ts-ignore
-    [RadioMessageKey.attack]: Coordinate;
+    [RadioMessageKeyRecord.attack]: Coordinate;
     // @ts-ignore
-    [RadioMessageKey.hit]: Coordinate;
+    [RadioMessageKeyRecord.hit]: Coordinate;
     // @ts-ignore
-    [RadioMessageKey.miss]: Coordinate;
+    [RadioMessageKeyRecord.miss]: Coordinate;
     /* eslint-enable @typescript-eslint/ban-ts-comment */
-}
+} & {
+    [K in RadioMessageKeyValues]: number | Coordinate;
+};
 // ! Note: this doesn't work because the version of TypeScript used in the micro:bit doesn't support template literal types
 // type RadioMessageValues = {
 //     // suppress typescript lol
 //     /* eslint-disable prettier/prettier, @typescript-eslint/ban-ts-comment */
 //     // @ts-ignore
-//     [K in RadioMessageKey]:
+//     [K in RadioMessageKeyRecord]:
 //         // @ts-ignore
 //         K extends `n${string}` ? number
 //         // @ts-ignore
@@ -84,12 +97,10 @@ interface RadioMessageValues {
 
 /**
  * A callback that is called when a radio message is received
- * @template T - The type of radio message. Should be a key of {@link RadioMessageKey}
+ * @template T - The type of radio message. Should be a key of {@link RadioMessageKeyRecord}
  */
 // ! Note: this doesn't work because enum and interface keys are weird on this typescript
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-type RadioMessageCallback<T extends RadioMessageKey> = (value: RadioMessageValues[T]) => void;
+type RadioMessageCallback<T extends RadioMessageKeyValues> = (value: RadioMessageValues[T]) => void;
 
 /**
  * Handles radio communication for the game
@@ -129,13 +140,13 @@ class GameRadio {
         return [number % 5, Math.floor(number / 5)];
     }
 
-    // private eventListeners: Record<RadioMessageKey, RadioMessageCallback<RadioMessageKey>[]>;
+    // private eventListeners: Record<RadioMessageKeyRecord, RadioMessageCallback<RadioMessageKeyRecord>[]>;
 
     /**
      * The event listeners for the radio messages
      */
     private eventListeners: {
-        [T in RadioMessageKey]?: RadioMessageCallback<T>[];
+        [T in RadioMessageKeyValues]?: RadioMessageCallback<T>[];
     } = {};
 
     /**
@@ -145,13 +156,16 @@ class GameRadio {
         // Connect to the radio
         radio.setGroup(GameRadio.radioGroupId);
 
+        // Send a test message so the simulator shows 2 microbits
+        radio.sendNumber(0);
+
         // Set the message handler
         radio.onReceivedValue((messageType: string, value: number): void => {
             // Debug
             console.log(`Received message: "${messageType}" with value "${value}"`);
 
             // Get the key for the message type
-            const key = messageType as RadioMessageKey;
+            const key = messageType as RadioMessageKeyValues;
 
             // Get the callbacks for the message type
             const callbacks = this.eventListeners[key];
@@ -165,7 +179,9 @@ class GameRadio {
             // ! Note: enum/interface keys
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            let messageValue: RadioMessageValues[RadioMessageKey];
+            let messageValue: RadioMessageValues[RadioMessageKeyRecord];
+
+            console.log(key.charAt(0));
 
             // Determine the type of message and convert the value
             switch (key.charAt(0)) {
@@ -196,9 +212,9 @@ class GameRadio {
      * Add a callback to be called when a radio message is received
      * @param messageType - The type of radio message to listen for
      * @param callback - The callback to call when the message is received
-     * @template T - The type of radio message. Should be a key of {@link RadioMessageKey}
+     * @template T - The type of radio message. Should be a key of {@link RadioMessageKeyRecord}
      */
-    public on<T extends RadioMessageKey>(messageType: T, callback: RadioMessageCallback<T>): void {
+    public on<T extends RadioMessageKeyValues>(messageType: T, callback: RadioMessageCallback<T>): void {
         // Create the array if it doesn't exist
         if (!this.eventListeners[messageType]) {
             this.eventListeners[messageType] = [];
@@ -212,25 +228,21 @@ class GameRadio {
      * Send a radio message
      * @param messageType - The type of radio message to send
      * @param value - The value of the message to send
-     * @template T - The type of radio message. Should be a key of {@link RadioMessageKey}
+     * @template T - The type of radio message. Should be a key of {@link RadioMessageKeyRecord}
      */
-    // ! Note: enum/interface keys
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    public sendValue<T extends RadioMessageKey>(messageType: T, value: RadioMessageValues[T]): void {
-        // Get the key for the message type
-        const key = messageType as string;
-
+    public sendValue(messageType: string, value: number | Coordinate): void {
         // Get the value of the message
         let messageValue: number;
 
         // Determine the type of message and convert the value
-        switch (key.charAt(0)) {
+        // console.log(messageType.charAt(0));
+
+        switch (messageType.charAt(0)) {
             case "n":
                 messageValue = value as number;
 
                 // Debug
-                console.log(`Sending message: "${key}" with value "${messageValue}"`);
+                console.log(`Sending message: "${messageType}" with value "${messageValue}"`);
 
                 break;
             case "c":
@@ -238,19 +250,19 @@ class GameRadio {
 
                 // Debug
                 console.log(
-                    `Sending message: "${key}" with value "${messageValue}", coordinates: ${(value as Coordinate)[0]}, ${(value as Coordinate)[1]}`,
+                    `Sending message: "${messageType}" with value "${messageValue}", coordinates: ${(value as Coordinate)[0]}, ${(value as Coordinate)[1]}`,
                 );
 
                 break;
             default:
                 // By default, just use the value
-                console.warn(`Unknown message type: ${key}`);
+                console.warn(`Unknown message type: ${messageType}`);
                 messageValue = value as number;
-                console.warn(`Sending message: "${key}" with value "${messageValue}"`);
+                console.warn(`Sending message: "${messageType}" with value "${messageValue}"`);
                 break;
         }
 
         // Send the message
-        radio.sendValue(key, messageValue);
+        radio.sendValue(messageType as never as string, messageValue);
     }
 }
