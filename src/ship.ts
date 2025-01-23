@@ -30,16 +30,16 @@ interface ShipClass {
  * A list of ship classes
  */
 const shipClasses = [
-    {
-        name: "Carrier",
-        size: 5,
-        count: 1,
-    },
-    {
-        name: "Battleship",
-        size: 4,
-        count: 1,
-    },
+    // {
+    //     name: "Carrier",
+    //     size: 5,
+    //     count: 1,
+    // },
+    // {
+    //     name: "Battleship",
+    //     size: 4,
+    //     count: 1,
+    // },
     {
         name: "Cruiser",
         size: 3,
@@ -93,6 +93,7 @@ type Coordinate = [uint8, uint8];
 /**
  * Represents a generic ship of any ship class
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class Ship {
     /**
      * The name of the ship class.

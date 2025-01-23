@@ -23,6 +23,12 @@ enum RadioMessageKey {
     playerLeft = "nPl",
 
     /**
+     * A player is proceeding to setup the game.
+     * - Payload is of type `number`: other player's player number.
+     */
+    proceedingToSetup = "nP2",
+
+    /**
      * A player is attacking a coordinate.
      * - Payload is of type `Coordinate`: the coordinate being attacked.
      */
@@ -51,6 +57,8 @@ interface RadioMessageValues {
     [RadioMessageKey.playerJoined]: number;
     // @ts-ignore
     [RadioMessageKey.playerLeft]: number;
+    // @ts-ignore
+    [RadioMessageKey.proceedingToSetup]: number;
     // @ts-ignore
     [RadioMessageKey.attack]: Coordinate;
     // @ts-ignore
@@ -86,6 +94,7 @@ type RadioMessageCallback<T extends RadioMessageKey> = (value: RadioMessageValue
 /**
  * Handles radio communication for the game
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 class GameRadio {
     /**
      * The radio group ID for the game for players to join

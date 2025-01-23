@@ -2,4 +2,5 @@
  * @file Battleship using micro:bit
  */
 
-console.log("Hello world!");
+// Create a new game
+const battleshipGameInstance = new Game();
