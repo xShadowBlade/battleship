@@ -128,7 +128,7 @@ class Ship {
      * @param orientation - The orientation of the ship
      * @example new Ship("Carrier", 0, 0, ShipOrientation.Horizontal)
      */
-    public constructor(name: ShipClassName, x: uint8, y: uint8, orientation: ShipOrientation) {
+    public constructor(name: ShipClassName, x: number, y: number, orientation: ShipOrientation) {
         // Set the parameters based on the ship class and constructor arguments
         this.name = name;
         this.size = shipClasses.find((shipClass: ShipClass) => shipClass.name === name).size;
@@ -166,7 +166,9 @@ class Ship {
      */
     private isCoordinatesValid(coordinates: Coordinate[] = this.getCoordinates()): boolean {
         // Check if the coordinates are within the grid
-        for (const [x, y] of coordinates) {
+        for (let i = 0; i < coordinates.length; i++) {
+            const [x, y] = coordinates[i];
+
             if (x < 0 || x > 4 || y < 0 || y > 4) {
                 return false;
             }

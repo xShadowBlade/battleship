@@ -78,6 +78,9 @@ interface RadioMessageValues {
  * A callback that is called when a radio message is received
  * @template T - The type of radio message. Should be a key of {@link RadioMessageKey}
  */
+// ! Note: this doesn't work because enum and interface keys are weird on this typescript
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
 type RadioMessageCallback<T extends RadioMessageKey> = (value: RadioMessageValues[T]) => void;
 
 /**
@@ -127,51 +130,6 @@ class GameRadio {
     } = {};
 
     /**
-     * The message handler for the radio messages
-     * @param messageType - The type of the message received
-     * @param value - The value of the message received
-     */
-    private onMessageReceived(messageType: string, value: number): void {
-        // Debug
-        console.log(`Received message: "${messageType}" with value "${value}"`);
-
-        // Get the key for the message type
-        const key = messageType as RadioMessageKey;
-
-        // Get the callbacks for the message type
-        const callbacks = this.eventListeners[key];
-
-        // If there are no callbacks, return
-        if (!callbacks) {
-            return;
-        }
-
-        // Get the value of the message
-        let messageValue: RadioMessageValues[RadioMessageKey];
-
-        // Determine the type of message and convert the value
-        switch (key.charAt(0)) {
-            case "n":
-                messageValue = value;
-                break;
-            case "c":
-                messageValue = GameRadio.numberToCoordinates(value);
-                break;
-            default:
-                // By default, just use the value
-                console.warn(`Unknown message type: ${key}`);
-                messageValue = value;
-                break;
-        }
-
-        // Call all the callbacks
-        for (const callback of callbacks) {
-            // @ts-expect-error - The value is the correct type
-            callback(messageValue);
-        }
-    }
-
-    /**
      * Create a new GameRadio instance
      */
     public constructor() {
@@ -179,7 +137,50 @@ class GameRadio {
         radio.setGroup(GameRadio.radioGroupId);
 
         // Set the message handler
-        radio.onReceivedValue(this.onMessageReceived);
+        radio.onReceivedValue((messageType: string, value: number): void => {
+            // Debug
+            console.log(`Received message: "${messageType}" with value "${value}"`);
+
+            // Get the key for the message type
+            const key = messageType as RadioMessageKey;
+
+            // Get the callbacks for the message type
+            const callbacks = this.eventListeners[key];
+
+            // If there are no callbacks, return
+            if (!callbacks) {
+                return;
+            }
+
+            // Get the value of the message
+            // ! Note: enum/interface keys
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            let messageValue: RadioMessageValues[RadioMessageKey];
+
+            // Determine the type of message and convert the value
+            switch (key.charAt(0)) {
+                case "n":
+                    messageValue = value;
+                    break;
+                case "c":
+                    messageValue = GameRadio.numberToCoordinates(value);
+                    break;
+                default:
+                    // By default, just use the value
+                    console.warn(`Unknown message type: ${key}`);
+                    messageValue = value;
+                    break;
+            }
+
+            // Call all the callbacks
+            for (let i = 0; i < callbacks.length; i++) {
+                const callback = callbacks[i];
+
+                // @ts-expect-error - The value is the correct type
+                callback(messageValue);
+            }
+        });
     }
 
     /**
@@ -204,6 +205,9 @@ class GameRadio {
      * @param value - The value of the message to send
      * @template T - The type of radio message. Should be a key of {@link RadioMessageKey}
      */
+    // ! Note: enum/interface keys
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     public sendValue<T extends RadioMessageKey>(messageType: T, value: RadioMessageValues[T]): void {
         // Get the key for the message type
         const key = messageType as string;
