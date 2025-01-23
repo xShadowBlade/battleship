@@ -40,6 +40,8 @@ export default tseslint.config(
             "@typescript-eslint/consistent-type-imports": "warn",
             "@typescript-eslint/naming-convention": "warn",
 
+            "@typescript-eslint/prefer-for-of": "off",
+
             "jsdoc/require-file-overview": 1,
         },
     },
