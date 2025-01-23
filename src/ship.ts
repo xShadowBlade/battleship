@@ -55,7 +55,12 @@ const shipClasses = [
         size: 2,
         count: 1,
     },
-] as const satisfies ShipClass[];
+
+    // ! Note: in this typescript version, the following line doesn't work because the version of TypeScript doesn't support as const or satisfies ShipClass[]
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+] as const;
+// ] as const satisfies ShipClass[];
 
 /**
  * The name of a ship class, from the list of ship classes
@@ -126,7 +131,7 @@ class Ship {
     public constructor(name: ShipClassName, x: uint8, y: uint8, orientation: ShipOrientation) {
         // Set the parameters based on the ship class and constructor arguments
         this.name = name;
-        this.size = shipClasses.find((shipClass) => shipClass.name === name).size;
+        this.size = shipClasses.find((shipClass: ShipClass) => shipClass.name === name).size;
         this.x = x;
         this.y = y;
         this.orientation = orientation;
