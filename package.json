@@ -14,7 +14,7 @@
   "scripts": {
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint --fix src/**/*.ts",
-    "postinstall": "pxt install"
+    "postinstall": "pxt target microbit && pxt install"
   },
   "browserslist": {
     "production": [
