@@ -40,7 +40,9 @@ export default tseslint.config(
             "@typescript-eslint/consistent-type-imports": "warn",
             "@typescript-eslint/naming-convention": "warn",
 
+            // Not compatible with micro:bit
             "@typescript-eslint/prefer-for-of": "off",
+            "@typescript-eslint/consistent-indexed-object-style": "off",
 
             "jsdoc/require-file-overview": 1,
         },

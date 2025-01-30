@@ -38,7 +38,7 @@ const DisplayCode = {
      * after the player has sent a `playerJoined` message
      */
     waitingForOtherPlayer: "W",
-}
+};
 
 /**
  * Possible error codes
@@ -82,8 +82,8 @@ class Game {
      * Logs a message with extra info like the player id and timestamp
      * @param message - The message to log
      */
-    public log(message: string) {
-        console.log(`${this.playerId} @ ${input.runningTimeMicros()}: ${message}`)
+    public log(message: string): void {
+        console.log(`${this.playerId} @ ${input.runningTimeMicros()}: ${message}`);
     }
 
     /**
@@ -99,8 +99,8 @@ class Game {
      */
     public connect(): void {
         // If the other player sent a `playerJoined` message, this player is the first person to join
-        this.radio.on(RadioMessageKeyRecord.playerJoined, (otherPlayerId: number): void => {
-            this.log(`Recieved playerJoined with id ${otherPlayerId}`);
+        this.radio.on(RadioMessageEnum.playerJoined, (otherPlayerId: number): void => {
+            this.log(`Received playerJoined with id ${otherPlayerId}`);
 
             // Set the game state to setup
             if (!(this.state === GameState.connecting)) {
@@ -113,13 +113,13 @@ class Game {
             this.placeShips();
 
             // Send a confirmation message to the other player
-            this.radio.sendValue(RadioMessageKeyRecord.proceedingToSetup, otherPlayerId);
+            this.radio.sendValue(RadioMessageEnum.proceedingToSetup, otherPlayerId);
             this.log(`Sending proceedingToSetup with other id ${otherPlayerId}`);
         });
 
         // If the other player sent a `proceedingToSetup` message, this player is the second person to join
-        this.radio.on(RadioMessageKeyRecord.proceedingToSetup, (thisPlayerId: number): void => {
-            this.log(`Recieved proceedingToSetup with id ${thisPlayerId}`);
+        this.radio.on(RadioMessageEnum.proceedingToSetup, (thisPlayerId: number): void => {
+            this.log(`Received proceedingToSetup with id ${thisPlayerId}`);
 
             // Confirm that the id is the same
             if (!this.playerId || this.playerId !== thisPlayerId) {
@@ -141,7 +141,7 @@ class Game {
         // When the logo is pressed
         input.onButtonPressed(Button.AB, (): void => {
             // Send a message to the other player
-            this.radio.sendValue(RadioMessageKeyRecord.playerJoined, this.playerId);
+            this.radio.sendValue(RadioMessageEnum.playerJoined, this.playerId);
             this.log(`Sending playerJoined with id ${this.playerId}`);
             this.log("Waiting for other player to join...");
 
