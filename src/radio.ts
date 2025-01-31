@@ -3,55 +3,6 @@
  */
 
 /**
- * The type of radio message.
- * The value should be a short string (3 characters or less) to save memory.
- * The first character should be a lowercase letter and denote the type of message.
- * - `n` for number
- * - `c` for coordinate
- */
-// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
-const RadioMessageEnum = {
-    /**
-     * A player has joined the game
-     * - Payload is of type `number`: the player number that joined.
-     */
-    playerJoined: "nPj",
-
-    /**
-     * A player has left the game.
-     * - Payload is of type `number`: the player number that left.
-     */
-    playerLeft: "nPl",
-
-    /**
-     * A player is proceeding to setup the game.
-     * - Payload is of type `number`: other player's player number.
-     */
-    proceedingToSetup: "nP2",
-
-    /**
-     * A player is attacking a coordinate.
-     * - Payload is of type `Coordinate`: the coordinate being attacked.
-     */
-    attack: "cAt",
-
-    /**
-     * The result of an attack - hit.
-     * - Payload is of type `Coordinate`: the coordinate that was hit.
-     */
-    hit: "cHt",
-
-    /**
-     * The result of an attack - miss.
-     * - Payload is of type `Coordinate`: the coordinate that was missed.
-     */
-    miss: "cMs",
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore - const is not supported in this typescript
-} as const;
-
-/**
  * The possible values for the keys of RadioMessage.
  * - Keys starting with `n` are of type `number`.
  * - Keys starting with `c` are of type `Coordinate`.
@@ -62,7 +13,7 @@ type PossibleRadioMessageValues = number & Coordinate;
  * The possible values for the keys of RadioMessage.
  * @example "nPj" | "nPl" | "cHt"
  */
-type RadioMessageKeyValues = (typeof RadioMessageEnum)[keyof typeof RadioMessageEnum];
+// type RadioMessageKeyValues = (typeof RadioMessageEnum)[keyof typeof RadioMessageEnum];
 
 /**
  * A callback that is called when a radio message is received
@@ -113,7 +64,8 @@ class GameRadio {
      * The event listeners for the radio messages
      */
     private eventListeners: {
-        [T in RadioMessageKeyValues]?: RadioMessageCallback[];
+        // [T in RadioMessageKeyValues]?: RadioMessageCallback[];
+        [T in string]?: RadioMessageCallback[];
     } = {};
 
     /**
@@ -132,7 +84,8 @@ class GameRadio {
             console.log(`Received message: "${messageType}" with value "${value}"`);
 
             // Get the key for the message type
-            const key = messageType as RadioMessageKeyValues;
+            // const key = messageType as RadioMessageKeyValues;
+            const key = messageType;
 
             // Get the callbacks for the message type
             const callbacks = this.eventListeners[key];
@@ -145,23 +98,22 @@ class GameRadio {
             // Get the value of the message
             // ! Note: enum/interface keys
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-ignore
-            let messageValue: RadioMessageValues[RadioMessageKeyRecord];
+            let messageValue: PossibleRadioMessageValues;
 
             console.log(key.charAt(0));
 
             // Determine the type of message and convert the value
             switch (key.charAt(0)) {
                 case "n":
-                    messageValue = value;
+                    messageValue = value as PossibleRadioMessageValues;
                     break;
                 case "c":
-                    messageValue = GameRadio.numberToCoordinates(value);
+                    messageValue = GameRadio.numberToCoordinates(value) as PossibleRadioMessageValues;
                     break;
                 default:
                     // By default, just use the value
                     console.warn(`Unknown message type: ${key}`);
-                    messageValue = value;
+                    messageValue = value as PossibleRadioMessageValues;
                     break;
             }
 
@@ -184,7 +136,7 @@ class GameRadio {
      *     console.log(`Player ${playerNumber} joined the game`);
      * });
      */
-    public on(messageType: RadioMessageKeyValues, callback: RadioMessageCallback): void {
+    public on(messageType: string, callback: RadioMessageCallback): void {
         // Create the array if it doesn't exist
         if (!this.eventListeners[messageType]) {
             this.eventListeners[messageType] = [];
