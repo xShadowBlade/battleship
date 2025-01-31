@@ -13,7 +13,7 @@ type PossibleRadioMessageValues = number & Coordinate;
  * The possible values for the keys of RadioMessage.
  * @example "nPj" | "nPl" | "cHt"
  */
-// type RadioMessageKeyValues = (typeof RadioMessageEnum)[keyof typeof RadioMessageEnum];
+type RadioMessageKeyValues = (typeof RadioMessageEnum)[keyof typeof RadioMessageEnum];
 
 /**
  * A callback that is called when a radio message is received
@@ -64,8 +64,8 @@ class GameRadio {
      * The event listeners for the radio messages
      */
     private eventListeners: {
-        // [T in RadioMessageKeyValues]?: RadioMessageCallback[];
-        [T in string]?: RadioMessageCallback[];
+        [T in RadioMessageKeyValues]?: RadioMessageCallback[];
+        // [T in string]?: RadioMessageCallback[];
     } = {};
 
     /**
@@ -136,7 +136,7 @@ class GameRadio {
      *     console.log(`Player ${playerNumber} joined the game`);
      * });
      */
-    public on(messageType: string, callback: RadioMessageCallback): void {
+    public on(messageType: RadioMessageKeyValues, callback: RadioMessageCallback): void {
         // Create the array if it doesn't exist
         if (!this.eventListeners[messageType]) {
             this.eventListeners[messageType] = [];
@@ -152,7 +152,7 @@ class GameRadio {
      * @param value - The value of the message to send
      * @template T - The type of radio message. Should be a key of {@link RadioMessageEnum}
      */
-    public sendValue(messageType: string, value: number | Coordinate): void {
+    public sendValue(messageType: RadioMessageKeyValues, value: number | Coordinate): void {
         // Get the value of the message
         let messageValue: number;
 

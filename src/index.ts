@@ -3,15 +3,7 @@
  */
 
 // test
-/**
- * The type of radio message.
- * The value should be a short string (3 characters or less) to save memory.
- * The first character should be a lowercase letter and denote the type of message.
- * - `n` for number
- * - `c` for coordinate
- */
-// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
-const RadioMessageEnum = {
+interface IRadioMessageEnum {
     /**
      * A player has joined the game
      * - Payload is of type `number`: the player number that joined.
@@ -47,17 +39,24 @@ const RadioMessageEnum = {
      * - Payload is of type `Coordinate`: the coordinate that was missed.
      */
     miss: "cMs",
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-};
-
-console.log(RadioMessageEnum);
-
-const a = {
-    a: 2
 }
 
-console.log(a)
+/**
+ * The type of radio message.
+ * The value should be a short string (3 characters or less) to save memory.
+ * The first character should be a lowercase letter and denote the type of message.
+ * - `n` for number
+ * - `c` for coordinate
+ */
+// eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
+const RadioMessageEnum: IRadioMessageEnum = {
+    playerJoined: "nPj",
+    playerLeft: "nPl",
+    proceedingToSetup: "nP2",
+    attack: "cAt",
+    hit: "cHt",
+    miss: "cMs",
+};
 
 // Create a new game
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
