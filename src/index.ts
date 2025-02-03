@@ -2,6 +2,13 @@
  * @file Battleship using micro:bit
  */
 
+/**
+ * The type of radio message.
+ * The value should be a short string (3 characters or less) to save memory.
+ * The first character should be a lowercase letter and denote the type of message.
+ * - `n` for number
+ * - `c` for coordinate
+ */
 // test
 interface IRadioMessageEnum {
     /**
@@ -42,11 +49,7 @@ interface IRadioMessageEnum {
 }
 
 /**
- * The type of radio message.
- * The value should be a short string (3 characters or less) to save memory.
- * The first character should be a lowercase letter and denote the type of message.
- * - `n` for number
- * - `c` for coordinate
+ * See {@link IRadioMessageEnum} for a full description
  */
 // eslint-disable-next-line @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
 const RadioMessageEnum: IRadioMessageEnum = {

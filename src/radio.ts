@@ -13,7 +13,7 @@ type PossibleRadioMessageValues = number & Coordinate;
  * The possible values for the keys of RadioMessage.
  * @example "nPj" | "nPl" | "cHt"
  */
-type RadioMessageKeyValues = (typeof RadioMessageEnum)[keyof typeof RadioMessageEnum];
+type RadioMessageKeyValues = IRadioMessageEnum[keyof IRadioMessageEnum];
 
 /**
  * A callback that is called when a radio message is received
@@ -46,7 +46,7 @@ class GameRadio {
 
     /**
      * Converts a single number to a 2D coordinate
-     * @param number - The single number to convert
+     * @param numberToConvert - The single number to convert
      * @returns The 2D coordinate representation of the number
      * @example
      * GameRadio.numberToCoordinates(0) // [0, 0]
@@ -54,18 +54,15 @@ class GameRadio {
      * GameRadio.numberToCoordinates(5) // [0, 1]
      * GameRadio.numberToCoordinates(17) // [2, 3]
      */
-    public static numberToCoordinates(number: number): Coordinate {
-        return [number % 5, Math.floor(number / 5)];
+    public static numberToCoordinates(numberToConvert: number): Coordinate {
+        return [numberToConvert % 5, Math.floor(numberToConvert / 5)];
     }
-
-    // private eventListeners: Record<RadioMessageKeyRecord, RadioMessageCallback<RadioMessageKeyRecord>[]>;
 
     /**
      * The event listeners for the radio messages
      */
     private eventListeners: {
         [T in RadioMessageKeyValues]?: RadioMessageCallback[];
-        // [T in string]?: RadioMessageCallback[];
     } = {};
 
     /**
@@ -79,7 +76,7 @@ class GameRadio {
         radio.sendNumber(0);
 
         // Set the message handler
-        radio.onReceivedValue((messageType: string, value: number): void => {
+        radio.onReceivedValue((messageType: RadioMessageKeyValues, value: number): void => {
             // Debug
             console.log(`Received message: "${messageType}" with value "${value}"`);
 
