@@ -79,6 +79,8 @@ class Game {
     public placeShips(): void {
         // TODO: Implement ship placement
         this.radio.log("Placing ships...");
+
+        basic.showString("ships");
     }
 
     /**
@@ -96,12 +98,17 @@ class Game {
             }
             this.state = GameState.setup;
 
-            // Place the ships
-            this.placeShips();
-
             // Send a confirmation message to the other player
             this.radio.sendValue(RadioMessageEnum.proceedingToSetup, otherPlayerId);
             // this.radio.log(`Sending proceedingToSetup with other id ${otherPlayerId}`);
+
+            // Blink
+            basic.showString(DisplayCode.waitingForOtherPlayer);
+            basic.pause(1000);
+            basic.clearScreen();
+
+            // Place the ships
+            this.placeShips();
         });
 
         // If the other player sent a `proceedingToSetup` message, this player is the second person to join
@@ -120,6 +127,10 @@ class Game {
                 return;
             }
             this.state = GameState.setup;
+
+            // Blink
+            basic.pause(1000);
+            basic.clearScreen();
 
             // Place the ships
             this.placeShips();
