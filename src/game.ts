@@ -61,11 +61,6 @@ class Game {
     public readonly radio = new GameRadio();
 
     /**
-     * The id of the player. Automatically generated to a random number
-     */
-    public playerId: number = randint(1, 2147483647);
-
-    /**
      * The current game state
      */
     public state: GameState = GameState.connecting;
@@ -79,19 +74,11 @@ class Game {
     }
 
     /**
-     * Logs a message with extra info like the player id and timestamp
-     * @param message - The message to log
-     */
-    public log(message: string): void {
-        console.log(`${this.playerId} @ ${input.runningTimeMicros()}: ${message}`);
-    }
-
-    /**
      * Places the ships on the board
      */
     public placeShips(): void {
         // TODO: Implement ship placement
-        console.log("Placing ships...");
+        this.radio.log("Placing ships...");
     }
 
     /**
@@ -100,7 +87,7 @@ class Game {
     public connect(): void {
         // If the other player sent a `playerJoined` message, this player is the first person to join
         this.radio.on(RadioMessageEnum.playerJoined, (otherPlayerId: number): void => {
-            this.log(`Received playerJoined with id ${otherPlayerId}`);
+            // this.radio.log(`Received playerJoined with id ${otherPlayerId}`);
 
             // Set the game state to setup
             if (!(this.state === GameState.connecting)) {
@@ -114,22 +101,22 @@ class Game {
 
             // Send a confirmation message to the other player
             this.radio.sendValue(RadioMessageEnum.proceedingToSetup, otherPlayerId);
-            this.log(`Sending proceedingToSetup with other id ${otherPlayerId}`);
+            // this.radio.log(`Sending proceedingToSetup with other id ${otherPlayerId}`);
         });
 
         // If the other player sent a `proceedingToSetup` message, this player is the second person to join
         this.radio.on(RadioMessageEnum.proceedingToSetup, (thisPlayerId: number): void => {
-            this.log(`Received proceedingToSetup with id ${thisPlayerId}`);
+            // this.radio.log(`Received proceedingToSetup with id ${thisPlayerId}`);
 
             // Confirm that the id is the same
-            if (!this.playerId || this.playerId !== thisPlayerId) {
+            if (!this.radio.playerId || this.radio.playerId !== thisPlayerId) {
                 // return;
-                console.warn(`Player IDs do not match. Expected ${this.playerId}, got ${thisPlayerId}`);
+                this.radio.log(`[WARN]: Player IDs do not match. Expected ${this.radio.playerId}, got ${thisPlayerId}`);
             }
 
             // Set the game state to setup
             if (!(this.state === GameState.connecting)) {
-                console.warn(`Unexpected game state: ${this.state}. Expected ${GameState.connecting}`);
+                this.radio.log(`[WARN]: Unexpected game state: ${this.state}. Expected ${GameState.connecting}`);
                 return;
             }
             this.state = GameState.setup;
@@ -141,9 +128,9 @@ class Game {
         // When the logo is pressed
         input.onButtonPressed(Button.AB, (): void => {
             // Send a message to the other player
-            this.radio.sendValue(RadioMessageEnum.playerJoined, this.playerId);
-            this.log(`Sending playerJoined with id ${this.playerId}`);
-            this.log("Waiting for other player to join...");
+            this.radio.sendValue(RadioMessageEnum.playerJoined, this.radio.playerId);
+            // this.radio.log(`Sending playerJoined with id ${this.playerId}`);
+            // this.radio.log("Waiting for other player to join...");
 
             // Show the waiting for other player message
             basic.showString(DisplayCode.waitingForOtherPlayer);

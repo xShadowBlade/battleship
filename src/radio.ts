@@ -66,6 +66,11 @@ class GameRadio {
     } = {};
 
     /**
+     * The id of the player. Automatically generated to a random number
+     */
+    public playerId: number = randint(1, 2147483647);
+
+    /**
      * Create a new GameRadio instance
      */
     public constructor() {
@@ -78,7 +83,7 @@ class GameRadio {
         // Set the message handler
         radio.onReceivedValue((messageType: RadioMessageKeyValues, value: number): void => {
             // Debug
-            console.log(`Received message: "${messageType}" with value "${value}"`);
+            this.log(`Received message: "${messageType}" with value "${value}"`);
 
             // Get the key for the message type
             // const key = messageType as RadioMessageKeyValues;
@@ -97,7 +102,7 @@ class GameRadio {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             let messageValue: PossibleRadioMessageValues;
 
-            console.log(key.charAt(0));
+            // console.log(key.charAt(0));
 
             // Determine the type of message and convert the value
             switch (key.charAt(0)) {
@@ -121,6 +126,14 @@ class GameRadio {
                 callback(messageValue);
             }
         });
+    }
+
+    /**
+     * Logs a message with extra info like the player id and timestamp
+     * @param message - The message to log
+     */
+    public log(message: string): void {
+        console.log(`${this.playerId} @ ${input.runningTimeMicros()}: ${message}`);
     }
 
     /**
@@ -161,14 +174,14 @@ class GameRadio {
                 messageValue = value as number;
 
                 // Debug
-                console.log(`Sending message: "${messageType}" with value "${messageValue}"`);
+                this.log(`Sending message: "${messageType}" with value "${messageValue}"`);
 
                 break;
             case "c":
                 messageValue = GameRadio.coordinatesToNumber(value as Coordinate);
 
                 // Debug
-                console.log(
+                this.log(
                     `Sending message: "${messageType}" with value "${messageValue}", coordinates: ${(value as Coordinate)[0]}, ${(value as Coordinate)[1]}`,
                 );
 
