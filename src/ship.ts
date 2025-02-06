@@ -58,7 +58,7 @@ type Coordinate = [uint8, uint8];
  * Represents a generic ship of any ship class
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-class Ship {
+class Ship implements RenderableObject {
     /**
      * The name of the ship class.
      * Gotten from the ship class object.
@@ -121,6 +121,9 @@ class Ship {
         }
 
         return coordinates;
+    }
+    public getRenderCoordinates(): Coordinate[] {
+        return this.getCoordinates();
     }
 
     /**

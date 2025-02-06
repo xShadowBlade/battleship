@@ -59,6 +59,10 @@ const DisplayCode = {
     waitingForOtherPlayer: "Z",
 };
 
+abstract class RenderableObject {
+    public abstract getRenderCoordinates(): Coordinate[];
+}
+
 /**
  * Possible error codes
  */
@@ -69,31 +73,99 @@ const DisplayCode = {
 //     playerIdMismatch = "PID",
 // }
 
+type GameRender = RenderableObject[];
+type GameRenderSet = GameRender[];
+
+/**
+ * The game graphics class, which handles the game's graphics.
+ */
+class GameGraphics {
+    /***
+     * A list of the coordinates of the game render sets
+     */
+    private readonly gameRenders: GameRenderSet = [
+        // The ship placement render set
+        [],
+        // The attack render set
+        [],
+    ];
+
+    /**
+     * The current render set index that is being displayed
+     */
+    private _currentRenderSetIndex = 0;
+
+    public get currentRenderSetIndex(): number {
+        return this._currentRenderSetIndex;
+    }
+
+    public set currentRenderSetIndex(index: number) {
+        this._currentRenderSetIndex = index;
+        this.render();
+    }
+
+    /**
+     * Adds a render set to the game renders
+     * @param renderSet - the render set to add
+     */
+    public addRenderSet(renderSet: GameRender = []): void {
+        this.gameRenders.push(renderSet);
+    }
+
+    /**
+     * Adds a coordinate list to the current render set
+     * @param index - the index of the render set
+     * @param sprite - the sprite to add
+     */
+    public addCoordinateListToRenderSet(index: number, sprite: RenderableObject): void {
+        this.gameRenders[index].push(sprite);
+    }
+
+    /**
+     * Renders the current render set
+     */
+    public render(): void {
+        // Clear the screen
+        basic.clearScreen();
+
+        // Iterate over each coordinate list in the current render set
+        // for (const coordinateList of this.gameRenders[this.currentRenderSetIndex]) {
+        for (let i = 0; i < this.gameRenders[this.currentRenderSetIndex].length; i++) {
+            const coordinateList = this.gameRenders[this.currentRenderSetIndex][i].getRenderCoordinates();
+
+            // Iterate over each coordinate in the coordinate list
+            // for (const coordinate of coordinateList) {
+            for (let j = 0; j < coordinateList.length; j++) {
+                const coordinate = coordinateList[j];
+
+                // Plot the coordinate on the LED grid
+                led.plot(coordinate[0], coordinate[1]);
+            }
+        }
+    }
+}
+
 /**
  * A cursor to move around the screen
  */
-class Cursor {
-    // TODO: move these to config paramter
+class Cursor implements RenderableObject {
     /**
      * Whether or not the cursor is blinking
      * @default true
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    public static IS_BLINKING = true;
+    // public static IS_BLINKING = true;
 
     /**
      * How long to hold the blink, in milliseconds (showing)
      * @default 1000
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    public static BLINK_DURATION_HOLD_MS = 1000;
+    // public static BLINK_DURATION_HOLD_MS = 1000;
 
     /**
      * How long to wait for the blink, in milliseconds (not showing)
      * @default 1000
      */
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    public static BLINK_DURATION_WAIT_MS = 5000;
+    // public static BLINK_DURATION_WAIT_MS = 5000;
 
     /**
      * The x coordinate
@@ -104,6 +176,11 @@ class Cursor {
      * The y coordinate
      */
     public y: uint8;
+
+    /**
+     * Whether or not the cursor is hidden
+     */
+    public isHidden = false;
 
     /**
      * Creates a new cursor
@@ -130,6 +207,10 @@ class Cursor {
      */
     public getCoordinate(): Coordinate {
         return [this.x, this.y];
+    }
+
+    public getRenderCoordinates(): Coordinate[] {
+        return this.isHidden ? [] : [this.getCoordinate()];
     }
 
     /**
@@ -163,10 +244,9 @@ class Cursor {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 class Game {
-    /**
-     * The radio group ID for the game for players to join
-     */
     public readonly radio = new GameRadio();
+    private readonly graphics = new GameGraphics();
+    public readonly cursor = new Cursor();
 
     /**
      * The current game state
@@ -181,9 +261,16 @@ class Game {
     public playerNumber: PlayerNumber = PlayerNumber.notConnected;
 
     /**
+     * The current turn
+     */
+    private currentTurn: PlayerNumber = PlayerNumber.one;
+
+    /**
      * Creates a new game
      */
     public constructor() {
+        this.cursor.isHidden = true;
+
         // Add listeners for connecting to the game
         this.connect();
     }
@@ -266,8 +353,7 @@ class Game {
     public placeShips(): void {
         // TODO: refactor
         this.radio.log("Placing ships...");
-        // Create a cursor to place ships
-        const cursor = new Cursor();
+        this.cursor.isHidden = false;
 
         // When the other player has placed their ships
         this.radio.on(RadioMessageEnum.shipsPlaced, (otherPlayerId: number): void => {
@@ -311,7 +397,6 @@ class Game {
 
                 while (!shipPlaced) {
                     // Show the cursor position
-                    led.plot(cursor.x, cursor.y);
 
                     // Wait for the user to press A or B to move the cursor
                     basic.pause(100);
@@ -319,7 +404,7 @@ class Game {
                     // Check if the user pressed A+B to place the ship
                     if (input.buttonIsPressed(Button.AB)) {
                         // Create a new ship at the cursor position
-                        const ship = new Ship(shipClass.name, cursor.x, cursor.y, ShipOrientation.horizontal);
+                        const ship = new Ship(shipClass.name, this.cursor.x, this.cursor.y, ShipOrientation.horizontal);
 
                         // Check if the ship coordinates are valid
                         if (ship.isCoordinatesValid() === true) {
@@ -327,12 +412,13 @@ class Game {
                             shipPlaced = true;
 
                             // Show the ship on the LED grid
-                            for (const coordinate of ship.getCoordinates()) {
-                                led.plot(coordinate[0], coordinate[1]);
-                            }
+                            // for (const coordinate of ship.getCoordinates()) {
+                            //     led.plot(coordinate[0], coordinate[1]);
+                            // }
+                            this.graphics.addCoordinateListToRenderSet(0, ship);
 
                             // Log the ship placement
-                            this.radio.log(`Placed ${shipClass.name} at (${cursor.x}, ${cursor.y})`);
+                            this.radio.log(`Placed ${shipClass.name} at (${this.cursor.x}, ${this.cursor.y})`);
                         } else {
                             // Show an error message
                             basic.showString("Err");
@@ -340,9 +426,6 @@ class Game {
                             basic.clearScreen();
                         }
                     }
-
-                    // Clear the cursor position
-                    led.unplot(cursor.x, cursor.y);
                 }
             }
         }
@@ -359,7 +442,6 @@ class Game {
      */
     public playGame(): void {
         // Create a cursor to attack the other player's board
-        // const cursor = new Cursor();
 
         // When the other player has attacked a coordinate
         // this.radio.on(RadioMessageEnum.attack, (coordinate: Coordinate): void => {
@@ -378,5 +460,10 @@ class Game {
         //         this.radio.sendValue(RadioMessageEnum.miss, coordinate);
         //     }
         // });
+    }
+
+    private sendAttack(coordinate: Coordinate): void {
+        // Send a message to the other player to indicate that the coordinate was attacked
+        this.radio.sendValue(RadioMessageEnum.attack, coordinate);
     }
 }
