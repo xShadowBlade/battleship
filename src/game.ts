@@ -95,6 +95,11 @@ class GameGraphics {
      */
     private _currentRenderSetIndex = 0;
 
+    // eslint-disable-next-line @typescript-eslint/no-useless-constructor
+    public constructor() {
+        // Set the initial render set
+    }
+
     public get currentRenderSetIndex(): number {
         return this._currentRenderSetIndex;
     }
