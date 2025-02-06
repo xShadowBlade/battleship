@@ -271,6 +271,11 @@ class Game {
     private currentTurn: PlayerNumber = PlayerNumber.one;
 
     /**
+     * The ships placed by the player
+     */
+    private shipsPlaced: Ship[] = [];
+
+    /**
      * Creates a new game
      */
     public constructor() {
@@ -278,6 +283,13 @@ class Game {
 
         // Add listeners for connecting to the game
         this.connect();
+    }
+
+    /**
+     * @returns Whether or not it is the player's turn
+     */
+    public isMyTurn(): boolean {
+        return this.playerNumber === this.currentTurn;
     }
 
     /**
@@ -422,6 +434,8 @@ class Game {
                             // }
                             this.graphics.addCoordinateListToRenderSet(0, ship);
 
+                            this.shipsPlaced.push(ship);
+
                             // Log the ship placement
                             this.radio.log(`Placed ${shipClass.name} at (${this.cursor.x}, ${this.cursor.y})`);
                         } else {
@@ -446,29 +460,66 @@ class Game {
      * Plays the game
      */
     public playGame(): void {
-        // Create a cursor to attack the other player's board
+        // When the player presses A+B, they confirm an attack
+        input.onButtonPressed(Button.AB, () => {
+            if (!this.isMyTurn()) {
+                basic.showString("Wait");
+                return;
+            }
 
-        // When the other player has attacked a coordinate
-        // this.radio.on(RadioMessageEnum.attack, (coordinate: Coordinate): void => {
-        //     // Check if the coordinate is a hit
-        //     if (this.isHit(coordinate)) {
-        //         // Show a hit message
-        //         basic.showString("Hit");
+            // Send attack coordinates to the other player
+            this.radio.sendValue(RadioMessageEnum.attack, this.cursor.getCoordinate());
+            // isMyTurn = false;
+            // basic.showString("Sent");
 
-        //         // Send a message to the other player to indicate that the coordinate was a hit
-        //         this.radio.sendValue(RadioMessageEnum.hit, coordinate);
-        //     } else {
-        //         // Show a miss message
-        //         basic.showString("Miss");
+            this.currentTurn = this.currentTurn === PlayerNumber.one ? PlayerNumber.two : PlayerNumber.one;
+        });
 
-        //         // Send a message to the other player to indicate that the coordinate was a miss
-        //         this.radio.sendValue(RadioMessageEnum.miss, coordinate);
-        //     }
-        // });
+        // When the other player attacks
+        this.radio.on(RadioMessageEnum.attack, (coordinate: Coordinate): void => {
+            // const coordinate = this.decodeCoordinate(encodedCoord);
+
+            // Check if the coordinate is a hit
+            if (this.isHit(coordinate)) {
+                basic.showString("Hit");
+                this.radio.sendValue(RadioMessageEnum.hit, coordinate);
+            } else {
+                basic.showString("Miss");
+                this.radio.sendValue(RadioMessageEnum.miss, coordinate);
+            }
+        });
+
+        // Receive hit/miss response from the opponent
+        this.radio.on(RadioMessageEnum.hit, (coordinate: Coordinate): void => {
+            // this.markEnemyHit(coordinate);
+            basic.showString("Hit!");
+            // isMyTurn = true;
+
+            // this.currentTurn = this.currentTurn === PlayerNumber.one ? PlayerNumber.two : PlayerNumber.one;
+        });
+
+        this.radio.on(RadioMessageEnum.miss, (coordinate: Coordinate): void => {
+            basic.showString("Miss!");
+            // isMyTurn = true;
+
+            // this.currentTurn = this.currentTurn === PlayerNumber.one ? PlayerNumber.two : PlayerNumber.one;
+        });
     }
 
-    private sendAttack(coordinate: Coordinate): void {
-        // Send a message to the other player to indicate that the coordinate was attacked
-        this.radio.sendValue(RadioMessageEnum.attack, coordinate);
+    /**
+     * @param coordinate - The coordinate to check
+     * @returns Whether or not the coordinate is a hit
+     */
+    private isHit(coordinate: Coordinate): boolean {
+        // For each ship, check if the coordinate is a hit
+        for (const ship of this.shipsPlaced) {
+            for (const shipCoordinate of ship.getCoordinates()) {
+                if (shipCoordinate[0] === coordinate[0] && shipCoordinate[1] === coordinate[1]) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
