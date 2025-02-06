@@ -371,6 +371,7 @@ class Game {
         // TODO: refactor
         this.radio.log("Placing ships...");
         this.cursor.isHidden = false;
+        this.state = GameState.waitingForOtherPlayerToSetup;
 
         // When the other player has placed their ships
         this.radio.on(RadioMessageEnum.shipsPlaced, (otherPlayerId: number): void => {
@@ -512,8 +513,15 @@ class Game {
      */
     private isHit(coordinate: Coordinate): boolean {
         // For each ship, check if the coordinate is a hit
-        for (const ship of this.shipsPlaced) {
-            for (const shipCoordinate of ship.getCoordinates()) {
+        // for (const ship of this.shipsPlaced) {
+        for (let i = 0; i < this.shipsPlaced.length; i++) {
+            const ship = this.shipsPlaced[i];
+            const shipCoordinates = ship.getCoordinates();
+
+            // for (const shipCoordinate of ship.getCoordinates()) {
+            for (let j = 0; j < shipCoordinates.length; j++) {
+                const shipCoordinate = shipCoordinates[j];
+
                 if (shipCoordinate[0] === coordinate[0] && shipCoordinate[1] === coordinate[1]) {
                     return true;
                 }
