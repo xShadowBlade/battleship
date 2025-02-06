@@ -74,6 +74,42 @@ const RadioMessageEnum: IRadioMessageEnum = {
     miss: "cMs",
 };
 
+/**
+ * A list of ship classes
+ */
+const shipClasses = [
+    // {
+    //     name: "Carrier",
+    //     size: 5,
+    //     count: 1,
+    // },
+    // {
+    //     name: "Battleship",
+    //     size: 4,
+    //     count: 1,
+    // },
+    {
+        name: "Cruiser",
+        size: 3,
+        count: 1,
+    },
+    {
+        name: "Submarine",
+        size: 3,
+        count: 1,
+    },
+    {
+        name: "Destroyer",
+        size: 2,
+        count: 1,
+    },
+
+    // ! Note: in this typescript version, the following line doesn't work because the version of TypeScript doesn't support as const or satisfies ShipClass[]
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // // @ts-ignore
+    // ] as const satisfies ShipClass[];
+];
+
 // Create a new game
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const battleshipGameInstance = new Game();

@@ -27,42 +27,6 @@ interface ShipClass {
 }
 
 /**
- * A list of ship classes
- */
-const shipClasses = [
-    // {
-    //     name: "Carrier",
-    //     size: 5,
-    //     count: 1,
-    // },
-    // {
-    //     name: "Battleship",
-    //     size: 4,
-    //     count: 1,
-    // },
-    {
-        name: "Cruiser",
-        size: 3,
-        count: 1,
-    },
-    {
-        name: "Submarine",
-        size: 3,
-        count: 1,
-    },
-    {
-        name: "Destroyer",
-        size: 2,
-        count: 1,
-    },
-
-    // ! Note: in this typescript version, the following line doesn't work because the version of TypeScript doesn't support as const or satisfies ShipClass[]
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-] as const;
-// ] as const satisfies ShipClass[];
-
-/**
  * The name of a ship class, from the list of ship classes
  */
 type ShipClassName = (typeof shipClasses)[number]["name"];
@@ -162,10 +126,11 @@ class Ship {
     /**
      * Check if the ship coordinates are valid
      * - The ship must be within the 5x5 grid (x and y coordinates must be between 0 and 4)
-     * @param coordinates - The coordinates of the ship
      * @returns True if the coordinates are valid, false otherwise
      */
-    public isCoordinatesValid(coordinates: Coordinate[] = this.getCoordinates()): boolean {
+    public isCoordinatesValid(): boolean {
+        const coordinates = this.getCoordinates();
+
         // Check if the coordinates are within the grid
         for (let i = 0; i < coordinates.length; i++) {
             const [x, y] = coordinates[i];

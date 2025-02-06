@@ -302,7 +302,10 @@ class Game {
         });
 
         // Iterate over each ship class
-        for (const shipClass of shipClasses) {
+        // for (const shipClass of shipClasses) {
+        for (let shipIndex = 0; shipIndex < shipClasses.length; shipIndex++) {
+            const shipClass = shipClasses[shipIndex];
+
             for (let i = 0; i < shipClass.count; i++) {
                 let shipPlaced = false;
 
@@ -319,13 +322,13 @@ class Game {
                         const ship = new Ship(shipClass.name, cursor.x, cursor.y, ShipOrientation.horizontal);
 
                         // Check if the ship coordinates are valid
-                        if (ship.isCoordinatesValid()) {
+                        if (ship.isCoordinatesValid() === true) {
                             // Place the ship
                             shipPlaced = true;
 
                             // Show the ship on the LED grid
-                            for (const [x, y] of ship.getCoordinates()) {
-                                led.plot(x, y);
+                            for (const coordinate of ship.getCoordinates()) {
+                                led.plot(coordinate[0], coordinate[1]);
                             }
 
                             // Log the ship placement
