@@ -83,30 +83,22 @@ class GameGraphics {
     /***
      * A list of the coordinates of the game render sets
      */
-    private readonly gameRenders: GameRenderSet = [
-        // The ship placement render set
-        [],
-        // The attack render set
-        [],
-    ];
+    private readonly gameRenders: GameRenderSet;
 
     /**
      * The current render set index that is being displayed
      */
-    private _currentRenderSetIndex = 0;
+    public currentRenderSetIndex = 0;
 
     // eslint-disable-next-line @typescript-eslint/no-useless-constructor
     public constructor() {
+        this.gameRenders = [
+            // The ship placement render set
+            [],
+            // The attack render set
+            [],
+        ];
         // Set the initial render set
-    }
-
-    public get currentRenderSetIndex(): number {
-        return this._currentRenderSetIndex;
-    }
-
-    public set currentRenderSetIndex(index: number) {
-        this._currentRenderSetIndex = index;
-        this.render();
     }
 
     /**
@@ -132,6 +124,9 @@ class GameGraphics {
     public render(): void {
         // Clear the screen
         basic.clearScreen();
+
+        console.log("rendering");
+        console.log(this.gameRenders);
 
         // Iterate over each coordinate list in the current render set
         // for (const coordinateList of this.gameRenders[this.currentRenderSetIndex]) {
@@ -188,11 +183,16 @@ class Cursor implements RenderableObject {
     public isHidden = false;
 
     /**
+     * A function to run when the cursor moves
+     */
+    private onMove: () => void;
+
+    /**
      * Creates a new cursor
      * @param x - the starting x coordinate
      * @param y - the starting y coordinate
      */
-    public constructor(x = 0, y = 0) {
+    public constructor(x = 0, y = 0, onMove?: () => void) {
         // Set the values and normalize
         this.x = x;
         this.y = y;
@@ -205,6 +205,12 @@ class Cursor implements RenderableObject {
 
         // A to move down 1
         input.onButtonPressed(Button.A, () => this.moveCursor(0, 1));
+
+        if (onMove) {
+            this.onMove = onMove;
+        } else {
+            this.onMove = (() => {});
+        }
     }
 
     /**
@@ -228,6 +234,7 @@ class Cursor implements RenderableObject {
         this.y += y;
 
         this.normalizeCoordinates();
+        this.onMove();
     }
 
     /**
@@ -251,7 +258,7 @@ class Cursor implements RenderableObject {
 class Game {
     public readonly radio = new GameRadio();
     private readonly graphics = new GameGraphics();
-    public readonly cursor = new Cursor();
+    public readonly cursor = new Cursor(0, 0, () => this.graphics.render());
 
     /**
      * The current game state
@@ -359,6 +366,8 @@ class Game {
         // TODO: refactor
         this.radio.log("Placing ships...");
         this.cursor.isHidden = false;
+        this.graphics.addCoordinateListToRenderSet(0, this.cursor);
+        this.graphics.render();
 
         // When the other player has placed their ships
         this.radio.on(RadioMessageEnum.shipsPlaced, (otherPlayerId: number): void => {
@@ -400,7 +409,8 @@ class Game {
             for (let i = 0; i < shipClass.count; i++) {
                 let shipPlaced = false;
 
-                while (!shipPlaced) {
+                basic.forever(() => {
+                    if (shipPlaced) return;
                     // Show the cursor position
 
                     // Wait for the user to press A or B to move the cursor
@@ -431,7 +441,7 @@ class Game {
                             basic.clearScreen();
                         }
                     }
-                }
+                });
             }
         }
 
