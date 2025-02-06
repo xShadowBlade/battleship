@@ -165,7 +165,7 @@ class Ship {
      * @param coordinates - The coordinates of the ship
      * @returns True if the coordinates are valid, false otherwise
      */
-    private isCoordinatesValid(coordinates: Coordinate[] = this.getCoordinates()): boolean {
+    public isCoordinatesValid(coordinates: Coordinate[] = this.getCoordinates()): boolean {
         // Check if the coordinates are within the grid
         for (let i = 0; i < coordinates.length; i++) {
             const [x, y] = coordinates[i];
